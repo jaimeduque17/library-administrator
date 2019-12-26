@@ -4,17 +4,18 @@ import { connect } from 'react-redux';
 import { firestoreConnect } from 'react-redux-firebase';
 import { Link } from 'react-router-dom';
 
-const Subscribers = ({subscribers}) => {
+import Spinner from '../layout/Spinner';
 
-console.log('subscribers', subscribers);
-    if(!subscribers) return <h1>Loading...</h1>;
+const Subscribers = ({ subscribers }) => {
+
+    if (!subscribers) return <Spinner />;
 
     return (
         <div className="row">
             <div className="col-md-12 mb-4">
                 <Link
-                to="/subscribers/new"
-                className="btn btn-primary"
+                    to="/subscribers/new"
+                    className="btn btn-primary"
                 >
                     <i className="fas fa-plus"></i> New Subscriber
                 </Link>
@@ -39,8 +40,8 @@ console.log('subscribers', subscribers);
                             <td>{subscriber.career}</td>
                             <td>
                                 <Link
-                                to={`/subscribers/show/${subscriber.id}`}
-                                className="btn btn-success btn-block"
+                                    to={`/subscribers/show/${subscriber.id}`}
+                                    className="btn btn-success btn-block"
                                 >
                                     <i className="fas fa-angle-double-right"></i> More Information
                                 </Link>
@@ -54,7 +55,7 @@ console.log('subscribers', subscribers);
 }
 
 export default compose(
-    firestoreConnect([{collection: 'subscribers'}]),
+    firestoreConnect([{ collection: 'subscribers' }]),
     connect((state, props) => ({
         subscribers: state.firestore.ordered.subscribers
     }))
