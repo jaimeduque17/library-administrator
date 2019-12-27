@@ -9,7 +9,33 @@ import Spinner from '../layout/Spinner';
 class EditSubscriber extends Component {
 
     // create refs
-    
+    nameInput = React.createRef();
+    lastNameInput = React.createRef();
+    codeInput = React.createRef();
+    careerInput = React.createRef();
+
+    // edit the subscriptor in the data base
+    editSubscriber = e => {
+        e.preventDefault();
+
+        // create the object to update
+        const suscriberUpdated = {
+            name : this.nameInput.current.value,
+            lastName : this.lastNameInput.current.value,
+            code : this.codeInput.current.value,
+            career : this.careerInput.current.value,
+        }
+
+        // extract subscriber, firestore and history of props
+        const {subscriber, firestore, history} = this.props;
+
+        // store in the data base with firestore
+        firestore.update({
+            collection: 'subscribers',
+            doc: subscriber.id
+        }, suscriberUpdated).then(history.push('/subscribers'));
+
+    }
 
     render() {
 
@@ -31,7 +57,7 @@ class EditSubscriber extends Component {
                     <div className="row justify-content-center">
                         <div className="col-md-8 mt-5">
                             <form
-                                onSubmit={this.addSubscriber}
+                                onSubmit={this.editSubscriber}
                             >
                                 <div className="form-group">
                                     <label>Name:</label>
@@ -41,7 +67,7 @@ class EditSubscriber extends Component {
                                         name="name"
                                         placeholder="Subscriber Name"
                                         required
-                                        onChange={this.readData}
+                                        ref={this.nameInput}
                                         defaultValue={subscriber.name}
                                     />
                                 </div>
@@ -53,7 +79,7 @@ class EditSubscriber extends Component {
                                         name="lastName"
                                         placeholder="Subscriber Last Name"
                                         required
-                                        onChange={this.readData}
+                                        ref={this.lastNameInput}
                                         defaultValue={subscriber.lastName}
                                     />
                                 </div>
@@ -65,7 +91,7 @@ class EditSubscriber extends Component {
                                         name="career"
                                         placeholder="Subscriber Career"
                                         required
-                                        onChange={this.readData}
+                                        ref={this.careerInput}
                                         defaultValue={subscriber.career}
                                     />
                                 </div>
@@ -77,7 +103,7 @@ class EditSubscriber extends Component {
                                         name="code"
                                         placeholder="Subscriber Code"
                                         required
-                                        onChange={this.readData}
+                                        ref={this.codeInput}
                                         defaultValue={subscriber.code}
                                     />
                                 </div>
@@ -93,6 +119,10 @@ class EditSubscriber extends Component {
             </div>
         );
     }
+}
+
+EditSubscriber.propTypes = {
+    firestore: PropTypes.object.isRequired
 }
 
 export default compose(
