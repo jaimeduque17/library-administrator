@@ -9,7 +9,7 @@ import Spinner from '../layout/Spinner';
 const Subscribers = ({ subscribers, firestore }) => {
 
     if (!subscribers) return <Spinner />;
-
+    console.log(subscribers);
     // delete subscribers
     const deleteSubscriber = id => {
         // delete
@@ -23,7 +23,7 @@ const Subscribers = ({ subscribers, firestore }) => {
         <div className="row">
             <div className="col-md-12 mb-4">
                 <Link
-                    to="/subscribers/new"
+                    to={"/subscribers/new"}
                     className="btn btn-primary"
                 >
                     <i className="fas fa-plus"></i> New Subscriber
