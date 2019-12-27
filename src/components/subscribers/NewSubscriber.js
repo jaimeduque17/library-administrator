@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { firestoreConnect } from 'react-redux-firebase';
+import PropTypes from 'prop-types';
 
 class NewSubscriber extends Component {
     state = {
@@ -8,6 +10,30 @@ class NewSubscriber extends Component {
         career: '',
         code: ''
     }
+
+    // add subscriber to the data base
+    addSubscriber = e => {
+        e.preventDefault();
+
+        // extract the state values
+        const newSubscriber = { ...this.state };
+        console.log(newSubscriber);
+
+        // extract firestore of props
+        const { firestore, history } = this.props;
+
+        // save in the data base
+        firestore.add({ collection: 'subscribers' }, newSubscriber)
+            .then(() => history.push('/subscribers'))
+    }
+
+    // extract the input values and it put in th state
+    readData = e => {
+        this.setState({
+            [e.target.name]: e.target.value
+        })
+    }
+
     render() {
         return (
             <div className="row">
@@ -22,7 +48,9 @@ class NewSubscriber extends Component {
                     </h2>
                     <div className="row justify-content-center">
                         <div className="col-md-8 mt-5">
-                            <form>
+                            <form
+                                onSubmit={this.addSubscriber}
+                            >
                                 <div className="form-group">
                                     <label>Name:</label>
                                     <input
@@ -72,9 +100,9 @@ class NewSubscriber extends Component {
                                     />
                                 </div>
                                 <input
-                                type="submit"
-                                value="Add Subscriber"
-                                className="btn btn-success"
+                                    type="submit"
+                                    value="Add Subscriber"
+                                    className="btn btn-success"
                                 />
                             </form>
                         </div>
@@ -85,4 +113,8 @@ class NewSubscriber extends Component {
     }
 }
 
-export default NewSubscriber;
+NewSubscriber.propTypes = {
+    firestore: PropTypes.object.isRequired
+}
+
+export default firestoreConnect()(NewSubscriber);
