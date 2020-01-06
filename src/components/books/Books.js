@@ -6,9 +6,18 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Spinner from '../layout/Spinner';
 
-const Books = ({ books }) => {
+const Books = ({ books, firestore }) => {
 
     if (!books) return <Spinner />;
+
+    // delete books
+    const deleteBook = id => {
+        // delete
+        firestore.delete({
+            collection: 'books',
+            doc: id
+        });
+    }
 
     return (
         <div className="row">
@@ -49,8 +58,9 @@ const Books = ({ books }) => {
                                     <i className="fas fa-angle-double-right"></i> More Information
                                 </Link>
                                 <button
-                                type="button"
-                                className="btn btn-danger btn-block"
+                                    type="button"
+                                    className="btn btn-danger btn-block"
+                                    onClick={() => deleteBook(book.id)}
                                 >
                                     <i className="fas fa-trash-alt"></i> Delete
                                 </button>
