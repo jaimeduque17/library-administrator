@@ -1,12 +1,92 @@
 import React, { Component } from 'react';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { firestoreConnect } from 'react-redux-firebase';
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import Spinner from '../layout/Spinner';
 
 class ShowBook extends Component {
-    state = {  }
-    render() { 
-        return ( 
-            <h1>Show Book</h1>
-         );
+    state = {}
+    render() {
+
+        // extract the book
+        const { book } = this.props;
+
+        if (!book) return <Spinner />
+
+        // button to request a book
+        let btnBorrowed;
+
+        if (book.existence - book.borrowed.length > 0) {
+            btnBorrowed = <Link
+                to={`/books/borrowed/${book.id}`}
+                className="btn btn-success my-3"
+            >Apply for a loan</Link>
+        } else {
+            btnBorrowed = null;
+        }
+
+        return (
+            <div className="row">
+                <div className="col-md-6 mb-4">
+                    <Link to="/" className="btn btn-secondary">
+                        <i className="fas fa-arrow-circle-left"></i> Return to the List
+                    </Link>
+                </div>
+                <div className="col-md-6 mb-4">
+                    <Link to={`/books/edit/${book.id}`} className="btn btn-primary float-right">
+                        <i className="fas fa-pencil-alt"></i> Edit Book
+                    </Link>
+                </div>
+                <hr className="mx-5 w-100" />
+                <div className="col-12">
+                    <h2 className="mb-4">{book.title}</h2>
+                    <p>
+                        <span className="font-weight-bold">
+                            ISBN:
+                        </span> {''}
+                        {book.ISBN}
+                    </p>
+                    <p>
+                        <span className="font-weight-bold">
+                            Editorial:
+                        </span> {''}
+                        {book.editorial}
+                    </p>
+                    <p>
+                        <span className="font-weight-bold">
+                            Existence:
+                        </span> {''}
+                        {book.existence}
+                    </p>
+                    <p>
+                        <span className="font-weight-bold">
+                            Borrowed:
+                        </span> {''}
+                        {book.existence - book.borrowed.length}
+                    </p>
+                    {/* button to request a loan */}
+                    {btnBorrowed}
+                </div>
+            </div>
+        );
     }
 }
- 
-export default ShowBook;
+
+ShowBook.propTypes = {
+    firestore: PropTypes.object.isRequired
+}
+
+export default compose(
+    firestoreConnect(props => [
+        {
+            collection: 'books',
+            storeAs: 'book',
+            doc: props.match.params.id
+        }
+    ]),
+    connect(({ firestore: { ordered } }, props) => ({
+        book: ordered.book && ordered.book[0]
+    }))
+)(ShowBook)
