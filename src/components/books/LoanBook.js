@@ -5,9 +5,55 @@ import { firestoreConnect } from 'react-redux-firebase';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Spinner from '../layout/Spinner';
+import { queryByTestId } from '@testing-library/react';
 
 class LoanBook extends Component {
-    state = {}
+    state = {
+        search: '',
+        result: {},
+        noResults: false
+    }
+
+    // search student by code
+    searchStudent = e => {
+        e.preventDefault();
+
+        // get the value to search
+        const { search } = this.state;
+
+        // extract firestore
+        const { firestore } = this.props;
+
+        // get the query
+        const collection = firestore.collection('subscribers');
+        const query = collection.where("code", "==", search).get();
+
+        // read the results
+        query.then(result => {
+            if(result.empty) {
+                // no result
+                this.setState({
+                    noResults: true,
+                    result: {}
+                })
+            } else {
+                // there are result
+                const data = result.docs[0];
+                this.setState({
+                    result: data.data(),
+                    noResults: false
+                })
+            }
+        })
+    }
+
+    // store the code in the state
+    readData = e => {
+        this.setState({
+            [e.target.name]: e.target.value
+        })
+    }
+
     render() {
 
         // extract the book 
@@ -29,9 +75,11 @@ class LoanBook extends Component {
                     </h2>
                     <div className="row justify-content-center mt-5">
                         <div className="col-md-8">
-                            <form>
+                            <form
+                                onSubmit={this.searchStudent}
+                            >
                                 <legend className="color-primary text-center">
-                                    Search the subscriber for code
+                                    Search the subscriber by code
                                 </legend>
                                 <div className="form-group">
                                     <input
