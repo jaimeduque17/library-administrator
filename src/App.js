@@ -25,7 +25,7 @@ function App() {
           <Switch>
             <Route exact path="/" component={Books} />
             <Route exact path="/books/edit/:id" component={EditBook} />
-            <Route exact path="/books/loan/:id" component={LoanBook} />
+            <Route exact path="/books/borrowed/:id" component={LoanBook} />
             <Route exact path="/books/new" component={NewBook} />
             <Route exact path="/books/show/:id" component={ShowBook} />
 

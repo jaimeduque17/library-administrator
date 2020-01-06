@@ -121,6 +121,7 @@ class EditBook extends Component {
         );
     }
 }
+
 EditBook.propTypes = {
     firestore: PropTypes.object.isRequired
 }
