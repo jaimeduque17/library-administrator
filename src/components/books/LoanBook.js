@@ -5,7 +5,8 @@ import { firestoreConnect } from 'react-redux-firebase';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Spinner from '../layout/Spinner';
-import { queryByTestId } from '@testing-library/react';
+
+import SubscriberTab from '../subscribers/SubscriberTab';
 
 class LoanBook extends Component {
     state = {
@@ -62,6 +63,26 @@ class LoanBook extends Component {
         // show the spinner
         if (!book) return <Spinner />
 
+        // extract student's data
+        const {noResults, result} = this.state;
+
+        let studentTab, applyBtn;
+        if(result.name) {
+            studentTab = <SubscriberTab 
+                            student={result}
+                        />
+            applyBtn = <button
+                            type="button"
+                            className="btn btn-primary btn-block"
+                            onClick={this.applyLoan}
+                        >
+                        Apply for a loan
+                        </button>
+        } else {
+            studentTab = null;
+            applyBtn = null;
+        }
+
         return (
             <div className="row">
                 <div className="col-12 mb-4">
@@ -77,6 +98,7 @@ class LoanBook extends Component {
                         <div className="col-md-8">
                             <form
                                 onSubmit={this.searchStudent}
+                                className="mb-4"
                             >
                                 <legend className="color-primary text-center">
                                     Search the subscriber by code
@@ -95,6 +117,11 @@ class LoanBook extends Component {
                                     className="btn btn-success btn-block"
                                 />
                             </form>
+
+                            {/* show the student's tab and the button for apply for a loan*/}
+                            {studentTab}
+                            {applyBtn}
+
                         </div>
                     </div>
                 </div>
