@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { firestoreConnect } from 'react-redux-firebase';
+import PropTypes from 'prop-types';
 
 class NewBook extends Component {
     state = {
@@ -8,6 +10,32 @@ class NewBook extends Component {
         editorial: '',
         existence: ''
     }
+
+    // save the book in the data base
+    addBook = e => {
+        e.preventDefault();
+
+        // take a copy of the state
+        const newBook = this.state;
+
+        // add array of interested clients
+        newBook.borrowed = [];
+
+        // extract firestore with the methods
+        const { firestore, history } = this.props;
+
+        // add to the data base and redirect
+        firestore.add({collection: 'books'}, newBook)
+            .then(() => history.push('/'))
+    }
+
+    // stores in the state what the user writes 
+    readData = e => {
+        this.setState({
+            [e.target.name]: e.target.value
+        })
+    }
+
     render() {
         return (
             <div className="row">
@@ -22,7 +50,9 @@ class NewBook extends Component {
                     </h2>
                     <div className="row justify-content-center">
                         <div className="col-md-8 mt-5">
-                            <form>
+                            <form
+                                onSubmit={this.addBook}
+                            >
                                 <div className="form-group">
                                     <label>Title: </label>
                                     <input
@@ -86,4 +116,8 @@ class NewBook extends Component {
     }
 }
 
-export default NewBook;
+NewBook.propTypes = {
+    firestore: PropTypes.object.isRequired
+}
+
+export default firestoreConnect()(NewBook);
