@@ -31,7 +31,7 @@ class LoanBook extends Component {
 
         // read the results
         query.then(result => {
-            if(result.empty) {
+            if (result.empty) {
                 // no result
                 this.setState({
                     noResults: true,
@@ -46,6 +46,29 @@ class LoanBook extends Component {
                 })
             }
         })
+    }
+
+    // store the student's data for apply the book
+    applyLoan = () => {
+        const subscriber = this.state.result;
+
+        // discharge date
+        subscriber.apply_date = new Date().toLocaleDateString();
+
+        // get the book
+        const bookUpdate = this.props.book;
+
+        // add the subscriber to the book
+        bookUpdate.borrowed.push(subscriber);
+
+        // get firestore and history of props
+        const { firestore, history } = this.props;
+
+        // store in the data base
+        firestore.update({
+            collection: 'books',
+            doc: bookUpdate.id
+        }, bookUpdate).then(history.push('/'));
     }
 
     // store the code in the state
@@ -64,19 +87,19 @@ class LoanBook extends Component {
         if (!book) return <Spinner />
 
         // extract student's data
-        const {noResults, result} = this.state;
+        const { noResults, result } = this.state;
 
         let studentTab, applyBtn;
-        if(result.name) {
-            studentTab = <SubscriberTab 
-                            student={result}
-                        />
+        if (result.name) {
+            studentTab = <SubscriberTab
+                student={result}
+            />
             applyBtn = <button
-                            type="button"
-                            className="btn btn-primary btn-block"
-                            onClick={this.applyLoan}
-                        >
-                        Apply for a loan
+                type="button"
+                className="btn btn-primary btn-block"
+                onClick={this.applyLoan}
+            >
+                Apply for a loan
                         </button>
         } else {
             studentTab = null;
