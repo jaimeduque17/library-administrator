@@ -8,10 +8,12 @@ import Spinner from '../layout/Spinner';
 
 import SubscriberTab from '../subscribers/SubscriberTab';
 
+// Redux Actions
+import { searchUser } from '../../actions/searchUserActions';
+
 class LoanBook extends Component {
     state = {
         search: '',
-        result: {},
         noResults: false
     }
 
@@ -23,7 +25,7 @@ class LoanBook extends Component {
         const { search } = this.state;
 
         // extract firestore
-        const { firestore } = this.props;
+        const { firestore, searchUser } = this.props;
 
         // get the query
         const collection = firestore.collection('subscribers');
@@ -33,15 +35,21 @@ class LoanBook extends Component {
         query.then(result => {
             if (result.empty) {
                 // no result
+                // store in redux an empty object
+                searchUser({});
+
+                // update the state if there aren't results
                 this.setState({
                     noResults: true,
-                    result: {}
-                })
+                });
             } else {
                 // there are result
+                // add the result in the redux state
                 const data = result.docs[0];
+                searchUser(data.data());
+
+                // update the state if there are results
                 this.setState({
-                    result: data.data(),
                     noResults: false
                 })
             }
@@ -50,16 +58,23 @@ class LoanBook extends Component {
 
     // store the student's data for apply the book
     applyLoan = () => {
-        const subscriber = this.state.result;
+        const { user } = this.props;
 
         // discharge date
-        subscriber.apply_date = new Date().toLocaleDateString();
+        user.apply_date = new Date().toLocaleDateString();
 
-        // get the book
-        const bookUpdate = this.props.book;
+        // the props can't mutate, take a copy and create a new array
+        let borrowed = [];
+        borrowed = [...this.props.book.borrowed, user];
 
-        // add the subscriber to the book
-        bookUpdate.borrowed.push(subscriber);
+        // copy the object and add the borrowed
+        const book = { ...this.props.book };
+
+        // delete previous borrowed
+        delete book.borrowed;
+
+        // assign the borrowed
+        book.borrowed = borrowed;
 
         // get firestore and history of props
         const { firestore, history } = this.props;
@@ -67,8 +82,8 @@ class LoanBook extends Component {
         // store in the data base
         firestore.update({
             collection: 'books',
-            doc: bookUpdate.id
-        }, bookUpdate).then(history.push('/'));
+            doc: book.id
+        }, book).then(history.push('/'));
     }
 
     // store the code in the state
@@ -87,12 +102,12 @@ class LoanBook extends Component {
         if (!book) return <Spinner />
 
         // extract student's data
-        const { noResults, result } = this.state;
+        const { user } = this.props;
 
         let studentTab, applyBtn;
-        if (result.name) {
+        if (user.name) {
             studentTab = <SubscriberTab
-                student={result}
+                student={user}
             />
             applyBtn = <button
                 type="button"
@@ -104,6 +119,15 @@ class LoanBook extends Component {
         } else {
             studentTab = null;
             applyBtn = null;
+        }
+
+        // show error message
+        const { noResults } = this.state;
+        let resultMsg = '';
+        if (noResults) {
+            resultMsg = <div className="alert alert-danger text-center font-weight-bold">No Results</div>;
+        } else {
+            resultMsg = null;
         }
 
         return (
@@ -145,6 +169,9 @@ class LoanBook extends Component {
                             {studentTab}
                             {applyBtn}
 
+                            {/* show message "No Results" */}
+                            {resultMsg}
+
                         </div>
                     </div>
                 </div>
@@ -165,7 +192,8 @@ export default compose(
             doc: props.match.params.id
         }
     ]),
-    connect(({ firestore: { ordered } }, props) => ({
-        book: ordered.book && ordered.book[0]
-    }))
+    connect(({ firestore: { ordered }, user }, props) => ({
+        book: ordered.book && ordered.book[0],
+        user: user
+    }), { searchUser })
 )(LoanBook)
